@@ -1,0 +1,16 @@
+---
+
+# install:
+#   swap: false
+#   ros: true
+#   ros2: false
+#   data_science: false
+#   computer_vision: false
+#   machine_learning: false
+#   ardupilot: false
+#   px4: false
+#   realsense: false
+#   docker: false
+
+# swap_vars:
+#   size: 2048

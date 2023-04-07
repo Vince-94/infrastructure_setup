@@ -1,0 +1,72 @@
+---
+
+- name: System Info
+  hosts: localhost
+  connection: local
+
+
+  tasks:
+
+
+    #! User
+    # - name: Create user
+    #   user:
+    #     name: user
+    #     groups: user_group
+    #     password: user_pwd
+    #     append: yes
+
+    # - name: Remove user
+    #   user:
+    #     name: user
+    #     state: absent
+
+
+    #! Disk space
+    # - name: Disk usage from command module
+    #   command: df -h
+    #   register: space
+
+    # - debug:
+    #     var: space.stdout_lines
+
+
+    #! Disk space
+    # - name: Folders space (du -BG -s -x $dir/* $dir/.[A-Za-z0-9]* | sort -rn | head)
+    #   register: space
+    #   ansible.builtin.shell: 
+    #     cmd: du -BG -sxc $HOME/* $HOME/.[A-Za-z0-9]* | sort -rn | head
+    #     chdir: ~/
+    # - debug:
+    #     var: space.stdout_lines
+
+
+    # - name: Free space
+    #   ansible.builtin.shell: 
+    #     cmd: find $HOME/.cache/ $HOME/.ccache/ $HOME/.local/ -type f -atime +7 -delete
+
+
+    - name: Kernel version
+      register: kernel_version
+      ansible.builtin.shell: uname -r
+    - name: Print Kernel version
+      ansible.builtin.debug:
+        var: kernel_version.stdout
+
+    - name: Old Kernel version
+      register: old_kernel_version
+      ansible.builtin.shell: dpkg --list |
+        grep -Ei 'linux-image|linux-headers|linux-modules' |
+        grep -v {{ kernel_version.stdout }} |
+        grep -v linux-headers-generic-hwe-20.04 |
+        grep -v linux-image-generic-hwe-20.04 
+    - name: Print old Kernel version
+      ansible.builtin.debug:
+        var: old_kernel_version.stdout_lines[0][4:20]
+
+
+    # - name: Remove old kernels
+    #   ansible.builtin.shell: dpkg --purge {{ old_kernel_version.stdout_lines[0] }}
+    #   become: yes
+
+

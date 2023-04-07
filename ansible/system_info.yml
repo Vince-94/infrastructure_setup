@@ -1,0 +1,53 @@
+---
+
+- name: System Info
+  hosts: localhost
+  connection: local
+
+
+  tasks:
+
+    # OS distro
+    - name: OS distro
+      debug: msg="{{ ansible_lsb }}"
+
+    - name: OS distro
+      debug: msg="{{ ansible_distribution }} {{ ansible_distribution_version}} {{ ansible_distribution_release }}"
+
+    - name: OS family
+      debug: msg="{{ ansible_os_family }}"
+
+    - name: OS architecture
+      debug: msg="{{ ansible_architecture }}"
+
+
+    # User
+    - name: User name
+      debug: msg="{{ ansible_user_id }} [uid:{{ ansible_user_uid }}]"
+
+
+    # IP
+    - name: ip
+      debug: msg="{{ ansible_all_ipv4_addresses }}"
+
+    - name: hostname
+      debug: msg="{{ ansible_hostname }}"
+
+
+    # Memory
+    - name: SWAP memory
+      debug: msg="{{ ansible_swaptotal_mb }}"
+
+
+    # Python
+    - name: Python version
+      debug: msg="{{ ansible_python_version }}"
+
+    - name: Python version (verbose)
+      debug: msg="{{ ansible_python }}"
+
+
+    # Env
+    - name: Home dir
+      debug: msg="{{ ansible_env.HOME }}"
+

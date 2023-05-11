@@ -6,7 +6,7 @@ UBUNTU_USER=docker_user
 UBUNTU_UID=1000
 UBUNTU_PSW=Vince210994
 
-# OS target architecture
+# Repo env
 REPO_AUTHOR=vince_94
 REPO_NAME=model_predictive_control_stack
 TAG=development

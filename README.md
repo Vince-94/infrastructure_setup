@@ -33,10 +33,10 @@ source docker.sh <command>
   * ubuntu:22.04
 * [ROS2](https://github.com/osrf/docker_images/tree/3f4fbca923d80f834f3a89b5960bad5582652519):
   * foxy: 
-    * ros:foxy-ros-core
-    * ros:foxy
+    * [ros:foxy-ros-core](https://github.com/osrf/docker_images/blob/11c613986e35a1f36fd0fa18b49173e0c564cf1d/ros/foxy/ubuntu/focal/ros-core/Dockerfile)
+    * [ros:foxy](https://github.com/osrf/docker_images/blob/df19ab7d5993d3b78a908362cdcd1479a8e78b35/ros/foxy/ubuntu/focal/ros-base/Dockerfile)
     * ros:foxy-perception
-    * osrf/ros:foxy-desktop
+    * [osrf/ros:foxy-desktop](https://hub.docker.com/layers/osrf/ros/foxy-desktop/images/sha256-16b5de92feb29d59d4bf75f42650f81a7722089f2291cb4fe126d8aa42a93238?context=explore)
     * osrf/ros:foxy-desktop-full
   * humble:
     * ros:humble-ros-core
@@ -44,5 +44,3 @@ source docker.sh <command>
     * ros:humble-perception
     * osrf/ros:humble-desktop
     * osrf/ros:humble-desktop-full
-
-

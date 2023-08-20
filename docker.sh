@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source docker/ubuntu_humble.env
+source docker/ubuntu_config.env
 
 
 #! Environment variables
@@ -12,14 +12,18 @@ DOCKER_WS_PATH=$DOCKER_HOME/$WS_VOLUME
 PROJECT_FOLDER=$REPO_AUTHOR/$REPO_NAME
 
 # Docker file/image/container
-DOCKER_FILE=Dockerfile
-DOCKER_IMAGE=$PROJECT_FOLDER/$REPO_NAME-image
-DOCKER_CONTAINER=$REPO_NAME-container
+if [[ $ROS_ENABLE == true ]]; then
+    DOCKER_FILE=Dockerfile_ros
+else
+    DOCKER_FILE=Dockerfile
+fi
 
-
-# Print info
-echo "Container OS: Ubuntu $UBUNTU_CODENAME ($UBUNTU_RELEASE LTS)"
-echo ""
+if [[ $GITLAB_REGISTRY == true ]]; then
+    DOCKER_IMAGE=registry.gitlab.com/${PROJECT_FOLDER}-image
+else
+    DOCKER_IMAGE=${PROJECT_FOLDER}-image
+fi
+DOCKER_CONTAINER=${REPO_NAME}-container  # gtest_demo-0.1-container
 
 
 #! Commands
@@ -28,21 +32,31 @@ echo ""
 if [[ $1 == "build" ]]; then
     echo "Build docker image:
     - Dockerfile name:  $DOCKER_FILE
-    - Dockerimage name: $DOCKER_IMAGE:$VERSION
+    - Dockerimage name: $DOCKER_IMAGE:$TAG
     - Stage:            $BUILD_STAGE
     "
     docker build --rm \
+                 --build-arg UBUNTU_RELEASE=$UBUNTU_RELEASE \
+                 --build-arg ROS_DISTRO=$ROS_DISTRO \
                  --build-arg UBUNTU_USER=$UBUNTU_USER \
                  --build-arg UBUNTU_PSW=$UBUNTU_PSW \
                  --build-arg UBUNTU_UID=$UBUNTU_UID \
 	             --build-arg UBUNTU_GID=${UBUNTU_GID} \
                  -f $PWD/docker/$DOCKER_FILE \
                  --target $BUILD_STAGE \
-                 -t $DOCKER_IMAGE:$VERSION .
+                 -t $DOCKER_IMAGE:$TAG .
+
+# push
+elif [[ $1 == "push" ]]; then
+    echo "Push dockerimage to GitLab container registry
+    "
+
+    docker login registry.gitlab.com
+    docker push $DOCKER_IMAGE:$TAG
 
 # run
 elif [[ $1 == "run" ]]; then
-    echo "Run $DOCKER_CONTAINER -> $DOCKER_IMAGE:$VERSION
+    echo "Run $DOCKER_CONTAINER -> $DOCKER_IMAGE:$TAG
     "
     xhost +     # enable access to xhost from the container
     docker run  -it --rm --privileged \
@@ -64,7 +78,7 @@ elif [[ $1 == "run" ]]; then
                 --device /dev:/dev \
                 -w $DOCKER_WS_PATH \
                 --name $DOCKER_CONTAINER \
-                $DOCKER_IMAGE:$VERSION /bin/bash
+                $DOCKER_IMAGE:$TAG /bin/bash
 
 # exec
 elif [[ $1 == "exec" ]]; then
@@ -86,7 +100,7 @@ elif [[ $1 == "install" ]]; then
 	sudo install -m 0755 -d /etc/apt/keyrings
 	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 	sudo chmod a+r /etc/apt/keyrings/docker.gpg
-	echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "${VERSION_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "${TAG_CODENAME}")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 	sudo apt update
 	sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -116,18 +130,19 @@ elif [[ $1 == "info" ]]; then
     - Project name:             $REPO_NAME
     - Project author:           $REPO_AUTHOR"
     echo "Ubuntu info
-    - Ubuntu distro:            $UBUNTU_CODENAME ($UBUNTU_RELEASE LTS)
+    - Ubuntu distro:            $UBUNTU_RELEASE
     - Ubuntu user:              $UBUNTU_USER ($UBUNTU_UID)"
     echo "Container info
     - Dockerfile name:          $DOCKER_FILE
-    - Docker image name:        $DOCKER_IMAGE:$VERSION
-    - Docker image tag:         $VERSION
+    - Docker image name:        $DOCKER_IMAGE:$TAG
+    - Docker image tag:         $TAG
     - Docker container name:    $DOCKER_CONTAINER"
 
 # help
 elif [[ $1 == "help" ]]; then
     echo "Command list:
     - [build]:      build the Dockerfile to create the image (dockerimage)
+    - [push]:       push dockerimage to GitLab container registry
     - [run]:        run the dockerimage into a containter
     - [exec]:       join to the existing container
     - [permission]: add user permissions to docker envoronment

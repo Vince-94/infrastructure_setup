@@ -1,5 +1,7 @@
 #! base-stage
-FROM ubuntu:jammy as base-stage
+ARG UBUNTU_RELEASE
+
+FROM ubuntu:$UBUNTU_RELEASE as base-stage
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -24,6 +26,7 @@ RUN usermod -aG audio $UBUNTU_USER
 RUN usermod -aG video $UBUNTU_USER
 
 # Update
+# RUN add-apt-repository universe
 RUN apt update && \
 	apt upgrade -y
 
@@ -89,16 +92,17 @@ RUN pip3 install --upgrade \
     numpy scipy
 
 # Python system control deps
-RUN pip3 install --upgrade \
-    qpsolvers \
-    quadprog gurobipy osqp cvxopt cvxpy
+# RUN pip3 install --upgrade \
+#     qpsolvers \
+#     quadprog gurobipy osqp cvxopt cvxpy
 
 
 # Bazel (https://bazel.build/install/ubuntu)
-RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel-archive-keyring.gpg
-RUN mv bazel-archive-keyring.gpg /usr/share/keyrings
-RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-RUN apt update && apt install --quiet -y bazel
+# RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel-archive-keyring.gpg
+# RUN mv bazel-archive-keyring.gpg /usr/share/keyrings
+# RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+# RUN apt update && apt install --quiet -y bazel
+
 
 
 ##############

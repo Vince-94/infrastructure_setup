@@ -90,7 +90,7 @@ elif [[ $1 == "permission" ]]; then
     echo "Change folder permission to USER"
     sudo chown -R $USER:$USER $PWD/$WS_VOLUME           # set user ownership
     sudo chmod -R a+rwx $PWD/$WS_VOLUME                 # set user permissions
-    chmod +x docker/entrypoint.sh
+    chmod +x docker/*entrypoint.sh
 
 # install
 elif [[ $1 == "install" ]]; then

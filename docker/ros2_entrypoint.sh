@@ -2,6 +2,8 @@
 
 set -e
 
+echo "Entrypoint"
+
 # Source bashrc
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
 source ~/.bashrc
@@ -18,18 +20,18 @@ if [[ -d "../install" ]]; then
 fi
 
 # Print information
-if [[ $USER == $DOCKER_USER ]] && [[ $UID == $DOCKER_UID ]]; then
+if [[ $USER == $UBUNTU_USER ]] && [[ $UID == $UBUNTU_UID ]]; then
 	echo "User credentials:
 	- USERNAME: ($USER:$UID)
 	- HOSTNAME: $HOSTNAME
-	- PASSWORD: $DOCKER_PSW
+	- PASSWORD: $UBUNTU_PSW
 	"
 else
 	echo "User is not set correctly!"
-	if ![[ $USER == $DOCKER_USER ]]; then
-		echo "$USER is not $DOCKER_USER"
+	if ![[ $USER == $UBUNTU_USER ]]; then
+		echo "$USER is not $UBUNTU_USER"
 	else
-		echo "$UID is not $DOCKER_UID"
+		echo "$UID is not $UBUNTU_UID"
 	fi
 	return
 fi

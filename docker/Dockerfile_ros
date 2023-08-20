@@ -104,8 +104,8 @@ RUN pip3 install vcstool colcon-common-extensions
 
 
 
-#! ignition-stage
-FROM base-stage as ignition-stage
+# #! ignition-stage
+# FROM base-stage as ignition-stage
 
 # Install Gazebo Ignition
 # RUN sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
@@ -130,8 +130,8 @@ USER $UBUNTU_USER
 WORKDIR /home/$UBUNTU_USER
 
 # Set entrypoint
-COPY ./docker/ros_entrypoint.sh /
-ENTRYPOINT ["/ros_entrypoint.sh"]
+COPY ./docker/ros2_entrypoint.sh /
+ENTRYPOINT ["/ros2_entrypoint.sh"]
 
 ENV force_color_prompt=yes
 CMD ["bash"]

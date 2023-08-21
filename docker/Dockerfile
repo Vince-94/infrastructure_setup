@@ -115,6 +115,8 @@ RUN pip3 install --upgrade \
 # RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
 # RUN apt update && apt install --quiet -y bazel
 
+# Open html links
+RUN sudo apt install lynx
 
 
 ##############

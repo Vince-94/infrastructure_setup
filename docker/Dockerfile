@@ -96,6 +96,18 @@ RUN pip3 install --upgrade \
 #     qpsolvers \
 #     quadprog gurobipy osqp cvxopt cvxpy
 
+# # install CVXOPT (https://cvxopt.org/)
+# RUN pip3 install --upgrade cvxopt
+
+# # install CVXPY (https://www.cvxpy.org/index.html)
+# RUN pip3 install --upgrade cvxpy
+
+# # install Guroby ()
+# RUN pip3 install --upgrade gurobipy
+
+# # install osqp ()
+# RUN pip3 install --upgrade osqp
+
 
 # Bazel (https://bazel.build/install/ubuntu)
 # RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel-archive-keyring.gpg

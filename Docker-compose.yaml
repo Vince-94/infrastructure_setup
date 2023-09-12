@@ -1,0 +1,32 @@
+version: '3'
+services:
+  my_container:
+    image: docker.io/vince_94/ros2_project-image:0.1
+    container_name: ros2_project-container
+    privileged: true
+    hostname: vince
+    environment:
+      - LOCAL_USER_ID=1000
+      - USER=user
+      - UID=1000
+      - GROUPS=1000
+      - DISPLAY=0
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/tmp/.docker.xauth
+    ports:
+      - "14556:14556/udp"
+    network_mode: "host"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/.docker.xauth:/tmp/.docker.xauth
+      - ~/Personal/infrastructure_setup/workspace:~/Personal/workspace:rw
+      - /dev:/dev
+    devices:
+      - /dev:/dev
+    working_dir: ~/Personal/workspace
+    tty: true
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    command: /bin/bash -c "while sleep 1000; do ;; done"

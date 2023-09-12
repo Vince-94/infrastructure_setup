@@ -4,6 +4,7 @@
   - [Docker](#docker)
     - [Commands](#commands)
     - [Images](#images)
+    - [Working with docker in WSL](#working-with-docker-in-wsl)
 
 
 ## Docker
@@ -32,7 +33,7 @@ source docker.sh <command>
   * ubuntu:20.04
   * ubuntu:22.04
 * [ROS2](https://github.com/osrf/docker_images/tree/3f4fbca923d80f834f3a89b5960bad5582652519):
-  * foxy: 
+  * foxy:
     * [ros:foxy-ros-core](https://github.com/osrf/docker_images/blob/11c613986e35a1f36fd0fa18b49173e0c564cf1d/ros/foxy/ubuntu/focal/ros-core/Dockerfile)
     * [ros:foxy](https://github.com/osrf/docker_images/blob/df19ab7d5993d3b78a908362cdcd1479a8e78b35/ros/foxy/ubuntu/focal/ros-base/Dockerfile)
     * ros:foxy-perception
@@ -44,3 +45,14 @@ source docker.sh <command>
     * ros:humble-perception
     * osrf/ros:humble-desktop
     * osrf/ros:humble-desktop-full
+
+### Working with docker in WSL
+Requisites:
+- VS Code Remote Pack
+
+Steps:
+WSL -> VS Code GUI -> Docker container -> VS COde server
+
+https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA
+https://github.com/polyhobbyist/jetbot
+https://www.allisonthackston.com/articles/vscode-docker-ros2.html

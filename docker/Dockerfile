@@ -116,7 +116,7 @@ RUN pip3 install --upgrade \
 # RUN apt update && apt install --quiet -y bazel
 
 # Open html links
-RUN sudo apt install lynx
+RUN apt install --quiet -y lynx
 
 
 ##############

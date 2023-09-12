@@ -127,7 +127,8 @@ RUN pip3 install vcstool colcon-common-extensions
 RUN apt install -y ros-${ROS_DISTRO}-ros-ign
 
 # Open html links
-RUN sudo apt install lynx
+RUN apt install --quiet -y lynx
+RUN usermod -aG root $UBUNTU_USER
 
 
 ##############

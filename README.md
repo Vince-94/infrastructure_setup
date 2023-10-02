@@ -45,40 +45,42 @@ source docker.sh <command>
 - [ ] Improve dockerfile in order to build libs and delete source
 - [ ] Create dockerfile for deployment (arm)
 - [ ] Improve architecture
-  - [ ] load at runtime the `src` folder
-  - [ ] load at runtime the external libs
-    ```sh
-    # local architecture
-    HOME/
-        infrastructure_setup/
-            .devcontainer/
-            docker/
-                Dockefile
-                ros2_entrypoint.sh
-                ubuntu_config.env
-            workspace/
-                .vscode/
-                src/
-                colcon.sh
-            docker.sh
-            README.md
-        src/
-            pkg/
-        external_libs/
-    ```
+  - [ ] load at runtime the "src" folder
+  - [ ] load at runtime the "libs" folder
+  ```sh
+  # local architecture
+  HOME/
+      infrastructure_setup/
+          .devcontainer/
+          docker/
+              Dockefile
+              ros2_entrypoint.sh
+              ubuntu_config.env
+          workspace/
+              .vscode/
+              src/
+              colcon.sh
+          docker.sh
+          README.md
+      src/
+          pkg/
+      libs/
+  ```
 
-    ```sh
-    # container architecture
-    HOME/
-        workspace/
-            .vscode/
-            src/
-                pkg/
-            colcon.sh
-    ```
+  ```sh
+  # container architecture
+  HOME/
+      workspace/
+          .vscode/
+          src/
+              pkg/
+          colcon.sh
+      libs/
+  ```
 - [ ] Implement .devcontainer (WSL -> VS Code GUI -> Docker container -> VS Code server)
     - https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA
     - https://github.com/polyhobbyist/jetbot
     - https://www.allisonthackston.com/articles/vscode-docker-ros2.html
-
+- [ ] Implement Docker-compose
+- [ ] Implement a metapackage that clone all requirements
 

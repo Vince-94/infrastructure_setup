@@ -25,9 +25,7 @@ RUN usermod -aG audio $UBUNTU_USER
 RUN usermod -aG video $UBUNTU_USER
 
 # Update
-# RUN add-apt-repository universe
-RUN apt update && \
-	apt upgrade -y
+RUN apt update
 
 
 ########################
@@ -134,6 +132,12 @@ RUN usermod -aG root $UBUNTU_USER
 ##############
 # ENTRYPOINT #
 ##############
+
+RUN add-apt-repository universe
+
+# Configurations
+#TODO hardcoded
+COPY .vscode/ $HOME/workspace/.vscode/
 
 # Clean
 RUN apt -y autoremove \

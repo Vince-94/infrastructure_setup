@@ -78,11 +78,11 @@ source docker.sh <command>
       libs/
   ```
 - [ ] Implement .devcontainer (WSL -> VS Code GUI -> Docker container -> VS Code server)
-    - https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA
-    - https://github.com/polyhobbyist/jetbot
-    - https://www.allisonthackston.com/articles/vscode-docker-ros2.html
+  - https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA
+  - https://github.com/polyhobbyist/jetbot
+  - https://www.allisonthackston.com/articles/vscode-docker-ros2.html
 - [ ] Implement Docker-compose
-- [ ] Implement a metapackage that clone all requirements
+- [x] Implement a metapackage strategy that clone all requirements
 - [x] Install git in the container and enable auto-completation
   - sudo apt install -y bash-completion
   - source /usr/share/bash-completion/completions/git

@@ -60,10 +60,10 @@ elif [[ $1 == "run" ]]; then
     "
     xhost +     # enable access to xhost from the container
 
-    # DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
-    # for CONFIG in "${CONFIG_FILES[@]}"; do
-    #     DOCKER_VOLUMES+=" -v ${CONFIG_PATH}/${CONFIG}:${DOCKER_WS_PATH}/${CONFIG}:rw"
-    # done
+    DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
+    for CONFIG in "${CONFIG_FILES[@]}"; do
+        DOCKER_VOLUMES+=" -v ${CONFIG_PATH}/${CONFIG}:${DOCKER_WS_PATH}/${CONFIG}:rw"
+    done
 
     docker run  -it --rm --privileged \
                 -h $USER \
@@ -79,16 +79,16 @@ elif [[ $1 == "run" ]]; then
                 -v /etc/localtime:/etc/localtime:ro \
                 -v /tmp/.X11-unix:/tmp/.X11-unix \
                 -v /tmp/.docker.xauth:/tmp/.docker.xauth \
-                -v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw \
-                -v ${CONFIG_PATH}/${VSCODE_CONFIG}:${DOCKER_WS_PATH}/${VSCODE_CONFIG}:rw \
-            	-v ${CONFIG_PATH}/${BUILD_FILE}:${DOCKER_WS_PATH}/src/${BUILD_FILE}:rw \
+                ${DOCKER_VOLUMES} \
                 -v /dev:/dev \
                 --device /dev:/dev \
                 -w $DOCKER_WS_PATH \
                 --name $DOCKER_CONTAINER \
                 $DOCKER_IMAGE:$TAG /bin/bash
 
-                # ${DOCKER_VOLUMES} \
+                # -v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw \
+                # -v ${CONFIG_PATH}/${VSCODE_CONFIG}:${DOCKER_WS_PATH}/${VSCODE_CONFIG}:rw \
+            	# -v ${CONFIG_PATH}/${BUILD_FILE}:${DOCKER_WS_PATH}/src/${BUILD_FILE}:rw \
 
 # exec
 elif [[ $1 == "exec" ]]; then

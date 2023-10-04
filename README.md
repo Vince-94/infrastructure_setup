@@ -15,17 +15,18 @@
 source docker.sh <command>
 ```
 
-| Command      | Description                                            |
-| ------------ | ------------------------------------------------------ |
-| `build`      | build the Dockerfile to create the image (dockerimage) |
-| `push`       | push dockerimage to GitLab container registry          |
-| `run`        | run the dockerimage into a containter                  |
-| `exec`       | join to the existing container                         |
-| `permission` | add user permissions to docker envoronment             |
-| `install`    | install and configure Docker                           |
-| `clean`      | remove not needed images and container                 |
-| `info`       | show docker environment info                           |
-| `help`       | show script commands                                   |
+| Command      | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| `build`      | build the Dockerfile to create the image (dockerimage)       |
+| `push`       | push dockerimage to GitLab container registry                |
+| `run`        | run the dockerimage into a containter                        |
+| `exec`       | join to the existing container                               |
+| `permission` | add user permissions to docker envoronment                   |
+| `install`    | install and configure Docker                                 |
+| `inspect`    | show information of images, containers, volumes and networks |
+| `clean`      | remove not needed images and container                       |
+| `info`       | show docker environment info                                 |
+| `help`       | show script commands                                         |
 
 
 ### Images

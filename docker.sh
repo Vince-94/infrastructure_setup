@@ -7,7 +7,6 @@ source docker/ubuntu_config.env
 
 # Docker path
 DOCKER_HOME=/home/$UBUNTU_USER
-# LOCAL_WS_PATH=$PWD/$WS_VOLUME
 LOCAL_WS_PATH=$WS_PATH/$WS_NAME
 DOCKER_WS_PATH=$DOCKER_HOME/$WS_NAME
 PROJECT_FOLDER=$REPO_AUTHOR/$REPO_NAME
@@ -131,6 +130,28 @@ elif [[ $1 == "install" ]]; then
 	sudo usermod -aG docker ${USER}                     # add your user to the docker group
 	newgrp docker                                       # activate the changes to groups
 
+# inspect
+elif [[ $1 == "inspect" ]]; then
+    echo -e "Resume:"
+    docker system df
+    echo
+
+    echo -e "Images:"
+    docker images
+    echo
+
+    echo -e "Volumes:"
+    docker volume ls
+    echo
+
+    echo -e "Containers:"
+    docker ps -a
+    echo
+
+    echo -e "Network:"
+    docker network ls
+    echo
+
 # clean
 elif [[ $1 == "clean" ]]; then
     echo "Clean all the not needed images and container"
@@ -162,6 +183,7 @@ elif [[ $1 == "help" ]]; then
     - [exec]:       join to the existing container
     - [permission]: add user permissions to docker envoronment
     - [install]:    install and configure Docker
+    - [inspect]:    show information of images, containers, volumes and networks
     - [clean]:      remove not needed images and container
     - [info]:       show docker environment info
     - [help]:       show script commands"

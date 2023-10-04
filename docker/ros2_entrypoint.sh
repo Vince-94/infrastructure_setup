@@ -3,6 +3,7 @@
 set -e
 
 # Source bashrc
+source /usr/share/bash-completion/completions/git
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
 source ~/.bashrc
 

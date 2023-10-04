@@ -7,8 +7,9 @@ source docker/ubuntu_config.env
 
 # Docker path
 DOCKER_HOME=/home/$UBUNTU_USER
-LOCAL_WS_PATH=$PWD/$WS_VOLUME
-DOCKER_WS_PATH=$DOCKER_HOME/$WS_VOLUME
+# LOCAL_WS_PATH=$PWD/$WS_VOLUME
+LOCAL_WS_PATH=$WS_PATH/$WS_NAME
+DOCKER_WS_PATH=$DOCKER_HOME/$WS_NAME
 PROJECT_FOLDER=$REPO_AUTHOR/$REPO_NAME
 
 # Docker file/image/container
@@ -35,9 +36,6 @@ if [[ $1 == "build" ]]; then
     - Dockerimage name: $DOCKER_IMAGE:$TAG
     - Stage:            $BUILD_STAGE
     "
-
-    mkdir -p workspace
-
     docker build --rm \
                  --build-arg UBUNTU_RELEASE=$UBUNTU_RELEASE \
                  --build-arg ROS_DISTRO=$ROS_DISTRO \
@@ -53,7 +51,6 @@ if [[ $1 == "build" ]]; then
 elif [[ $1 == "push" ]]; then
     echo "Push dockerimage to GitLab container registry
     "
-
     docker login registry.gitlab.com
     docker push $DOCKER_IMAGE:$TAG
 
@@ -62,6 +59,12 @@ elif [[ $1 == "run" ]]; then
     echo "Run $DOCKER_CONTAINER -> $DOCKER_IMAGE:$TAG
     "
     xhost +     # enable access to xhost from the container
+
+    DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
+    for CONFIG in "${CONFIG_FILES[@]}"; do
+        DOCKER_VOLUMES+=" -v ${CONFIG_PATH}/${CONFIG}:${DOCKER_WS_PATH}/${CONFIG}:rw"
+    done
+
     docker run  -it --rm --privileged \
                 -h $USER \
                 -e LOCAL_USER_ID=$UBUNTU_UID \
@@ -76,7 +79,7 @@ elif [[ $1 == "run" ]]; then
                 -v /etc/localtime:/etc/localtime:ro \
                 -v /tmp/.X11-unix:/tmp/.X11-unix \
                 -v /tmp/.docker.xauth:/tmp/.docker.xauth \
-                -v $LOCAL_WS_PATH:$DOCKER_WS_PATH:rw \
+                ${DOCKER_VOLUMES} \
             	-v /dev:/dev \
                 --device /dev:/dev \
                 -w $DOCKER_WS_PATH \

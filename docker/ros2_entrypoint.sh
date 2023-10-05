@@ -7,6 +7,9 @@ source /usr/share/bash-completion/completions/git
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
 source ~/.bashrc
 
+# git configuration
+git config --global core.editor "code --wait"
+
 # Source ROS2 distro
 if [[ -n "${ROS_DISTRO}" ]]; then
 	source /opt/ros/$ROS_DISTRO/setup.bash

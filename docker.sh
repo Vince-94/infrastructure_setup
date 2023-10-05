@@ -59,18 +59,35 @@ elif [[ $1 == "run" ]]; then
     "
     xhost +     # enable access to xhost from the container
 
-    # Check volumes validity
+    # Check workspace folder validity
     if [ -d "$LOCAL_WS_PATH" ]; then
+        echo "Workspace dir: ${LOCAL_WS_PATH}"
         DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
+    else
+        echo "ERROR: No workspace provided!"
+        exit 1
     fi
 
+    # Check libraries folder validity
     if [ -d "$LIBS_PATH" ]; then
-        DOCKER_VOLUMES+=" -v ${LIBS_PATH}:${DOCKER_HOME}:rw"
+        echo "External libraries dir: $LIBS_PATH"
+        for item in "$LIBS_PATH"/*; do
+            if [ -e "$item" ]; then
+                filename=$(basename "$item")
+                DOCKER_VOLUMES+=" -v $LIBS_PATH/$filename:$DOCKER_HOME/$filename:rw"
+            fi
+        done
     fi
 
+    # Check config folder validity
     if [ -d "$CONFIG_PATH" ]; then
-        for CONFIG in "${CONFIG_FILES[@]}"; do
-            DOCKER_VOLUMES+=" -v ${CONFIG_PATH}/${CONFIG}:${DOCKER_WS_PATH}/${CONFIG}:rw"
+        echo "Config dir: $CONFIG_PATH"
+        shopt -s dotglob
+        for item in "$CONFIG_PATH"/*; do
+            if [ -e "$item" ]; then
+                filename=$(basename "$item")
+                DOCKER_VOLUMES+=" -v $CONFIG_PATH/$filename:$DOCKER_WS_PATH/$filename:rw"
+            fi
         done
     fi
 
@@ -135,6 +152,8 @@ elif [[ $1 == "install" ]]; then
 	sudo groupadd docker                                # create the docker group
 	sudo usermod -aG docker ${USER}                     # add your user to the docker group
 	newgrp docker                                       # activate the changes to groups
+
+    sudo apt install -y x11-xserver-utils
 
 # inspect
 elif [[ $1 == "inspect" ]]; then

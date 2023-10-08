@@ -15,17 +15,18 @@
 source docker.sh <command>
 ```
 
-| Command      | Description                                            |
-| ------------ | ------------------------------------------------------ |
-| `build`      | build the Dockerfile to create the image (dockerimage) |
-| `push`       | push dockerimage to GitLab container registry          |
-| `run`        | run the dockerimage into a containter                  |
-| `exec`       | join to the existing container                         |
-| `permission` | add user permissions to docker envoronment             |
-| `install`    | install and configure Docker                           |
-| `clean`      | remove not needed images and container                 |
-| `info`       | show docker environment info                           |
-| `help`       | show script commands                                   |
+| Command      | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| `build`      | build the Dockerfile to create the image (dockerimage)       |
+| `push`       | push dockerimage to GitLab container registry                |
+| `run`        | run the dockerimage into a containter                        |
+| `exec`       | join to the existing container                               |
+| `permission` | add user permissions to docker envoronment                   |
+| `install`    | install and configure Docker                                 |
+| `inspect`    | show information of images, containers, volumes and networks |
+| `clean`      | remove not needed images and container                       |
+| `info`       | show docker environment info                                 |
+| `help`       | show script commands                                         |
 
 
 ### Images
@@ -45,42 +46,46 @@ source docker.sh <command>
 - [ ] Improve dockerfile in order to build libs and delete source
 - [ ] Create dockerfile for deployment (arm)
 - [ ] Improve architecture
-  - [ ] load at runtime the "src" folder
-  - [ ] load at runtime the "libs" folder
+  - [x] load at runtime the project workspace
+  - [ ] load at runtime the external libraries
   ```sh
   # local architecture
   HOME/
-      infrastructure_setup/
-          .devcontainer/
-          docker/
-              Dockefile
-              ros2_entrypoint.sh
-              ubuntu_config.env
-          workspace/
-              .vscode/
-              src/
-              colcon.sh
-          docker.sh
-          README.md
+    infrastructure_setup/
+      .devcontainer/
+      docker/
+        Dockefile
+        ros2_entrypoint.sh
+        config.env
+      config/
+        .vscode/
+        colcon.sh
+      docker.sh
+      README.md
+    workspace/
       src/
-          pkg/
-      libs/
+        pkg/
+    libs/
+      src/
   ```
 
   ```sh
   # container architecture
   HOME/
-      workspace/
-          .vscode/
-          src/
-              pkg/
-          colcon.sh
-      libs/
+    workspace/
+      .vscode/
+      src/
+        pkg/
+      colcon.sh
+    libs/
+      src/
   ```
 - [ ] Implement .devcontainer (WSL -> VS Code GUI -> Docker container -> VS Code server)
-    - https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA
-    - https://github.com/polyhobbyist/jetbot
-    - https://www.allisonthackston.com/articles/vscode-docker-ros2.html
+  - https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA
+  - https://github.com/polyhobbyist/jetbot
+  - https://www.allisonthackston.com/articles/vscode-docker-ros2.html
 - [ ] Implement Docker-compose
-- [ ] Implement a metapackage that clone all requirements
-
+- [x] Implement a metapackage strategy that clone all requirements
+- [x] Install git in the container and enable auto-completation
+  - sudo apt install -y bash-completion
+  - source /usr/share/bash-completion/completions/git

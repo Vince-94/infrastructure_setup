@@ -1,14 +1,14 @@
 #!/bin/bash
 
-source docker/ubuntu_config.env
+source docker/config.env
 
 
 #! Environment variables
 
 # Docker path
 DOCKER_HOME=/home/$UBUNTU_USER
-LOCAL_WS_PATH=$PWD/$WS_VOLUME
-DOCKER_WS_PATH=$DOCKER_HOME/$WS_VOLUME
+LOCAL_WS_PATH=$WS_PATH/$WS_NAME
+DOCKER_WS_PATH=$DOCKER_HOME/$WS_NAME
 PROJECT_FOLDER=$REPO_AUTHOR/$REPO_NAME
 
 # Docker file/image/container
@@ -35,9 +35,6 @@ if [[ $1 == "build" ]]; then
     - Dockerimage name: $DOCKER_IMAGE:$TAG
     - Stage:            $BUILD_STAGE
     "
-
-    mkdir -p workspace
-
     docker build --rm \
                  --build-arg UBUNTU_RELEASE=$UBUNTU_RELEASE \
                  --build-arg ROS_DISTRO=$ROS_DISTRO \
@@ -53,7 +50,6 @@ if [[ $1 == "build" ]]; then
 elif [[ $1 == "push" ]]; then
     echo "Push dockerimage to GitLab container registry
     "
-
     docker login registry.gitlab.com
     docker push $DOCKER_IMAGE:$TAG
 
@@ -62,6 +58,39 @@ elif [[ $1 == "run" ]]; then
     echo "Run $DOCKER_CONTAINER -> $DOCKER_IMAGE:$TAG
     "
     xhost +     # enable access to xhost from the container
+
+    # Check workspace folder validity
+    if [ -d "$LOCAL_WS_PATH" ]; then
+        echo "Workspace dir: ${LOCAL_WS_PATH}"
+        DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
+    else
+        echo "ERROR: No workspace provided!"
+        exit 1
+    fi
+
+    # Check libraries folder validity
+    if [ -d "$LIBS_PATH" ]; then
+        echo "External libraries dir: $LIBS_PATH"
+        for item in "$LIBS_PATH"/*; do
+            if [ -e "$item" ]; then
+                filename=$(basename "$item")
+                DOCKER_VOLUMES+=" -v $LIBS_PATH/$filename:$DOCKER_HOME/$filename:rw"
+            fi
+        done
+    fi
+
+    # Check config folder validity
+    if [ -d "$CONFIG_PATH" ]; then
+        echo "Config dir: $CONFIG_PATH"
+        shopt -s dotglob
+        for item in "$CONFIG_PATH"/*; do
+            if [ -e "$item" ]; then
+                filename=$(basename "$item")
+                DOCKER_VOLUMES+=" -v $CONFIG_PATH/$filename:$DOCKER_WS_PATH/$filename:rw"
+            fi
+        done
+    fi
+
     docker run  -it --rm --privileged \
                 -h $USER \
                 -e LOCAL_USER_ID=$UBUNTU_UID \
@@ -76,8 +105,8 @@ elif [[ $1 == "run" ]]; then
                 -v /etc/localtime:/etc/localtime:ro \
                 -v /tmp/.X11-unix:/tmp/.X11-unix \
                 -v /tmp/.docker.xauth:/tmp/.docker.xauth \
-                -v $LOCAL_WS_PATH:$DOCKER_WS_PATH:rw \
-            	-v /dev:/dev \
+                ${DOCKER_VOLUMES} \
+                -v /dev:/dev \
                 --device /dev:/dev \
                 -w $DOCKER_WS_PATH \
                 --name $DOCKER_CONTAINER \
@@ -124,6 +153,30 @@ elif [[ $1 == "install" ]]; then
 	sudo usermod -aG docker ${USER}                     # add your user to the docker group
 	newgrp docker                                       # activate the changes to groups
 
+    sudo apt install -y x11-xserver-utils
+
+# inspect
+elif [[ $1 == "inspect" ]]; then
+    echo -e "Resume:"
+    docker system df
+    echo
+
+    echo -e "Images:"
+    docker images
+    echo
+
+    echo -e "Volumes:"
+    docker volume ls
+    echo
+
+    echo -e "Containers:"
+    docker ps -a
+    echo
+
+    echo -e "Network:"
+    docker network ls
+    echo
+
 # clean
 elif [[ $1 == "clean" ]]; then
     echo "Clean all the not needed images and container"
@@ -155,6 +208,7 @@ elif [[ $1 == "help" ]]; then
     - [exec]:       join to the existing container
     - [permission]: add user permissions to docker envoronment
     - [install]:    install and configure Docker
+    - [inspect]:    show information of images, containers, volumes and networks
     - [clean]:      remove not needed images and container
     - [info]:       show docker environment info
     - [help]:       show script commands"

@@ -1,0 +1,312 @@
+#! base-stage
+FROM dustynv/ros:foxy-desktop-l4t-r35.2.1 as ubuntu-stage
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG UBUNTU_USER=docker_user
+ARG UBUNTU_PSW=docker
+ARG UBUNTU_UID=1000
+ARG UBUNTU_GID=1000
+ARG ROS_DISTRO=foxy
+
+
+# Install the necessary tools for cross-building
+RUN apt update && apt install -y qemu-user-static
+
+# Enable the binfmt_misc kernel feature
+RUN update-binfmts --enable qemu-arm
+
+# Set the QEMU interpreter for ARM binaries
+ENV QEMU_EXECVE_BIN /usr/bin/qemu-arm-static
+
+
+# Create local user
+RUN useradd -r -m -d /home/$UBUNTU_USER -s /bin/bash -g root -G sudo -G dialout -u $UBUNTU_UID -p "$(openssl passwd -6 $UBUNTU_PSW)" $UBUNTU_USER
+
+# Add local user to system groups
+RUN usermod -aG sudo $UBUNTU_USER
+RUN usermod -aG dialout $UBUNTU_USER
+RUN usermod -aG tty $UBUNTU_USER
+RUN usermod -aG audio $UBUNTU_USER
+RUN usermod -aG video $UBUNTU_USER
+
+########################
+# INSTALL DEPENDENCIES #
+########################
+
+# Ubuntu deps
+RUN apt update && apt install --quiet -y \
+    sudo software-properties-common lsb-release \
+    apt-transport-https ca-certificates gnupg gnupg2 gnupg-agent libssl-dev \
+    curl file wget zip unzip pkg-config openssh-client openssh-server \
+    xterm tmux gdb valgrind \
+    htop net-tools nmap
+
+
+# C++ deps
+RUN apt update && apt install --quiet -y \
+    build-essential \
+    clang \
+    cmake \
+    ccache
+
+# C++ linter
+RUN apt update && apt install --quiet -y \
+    clang-tidy clang-tools \
+    cppcheck
+
+# C++ testing deps
+RUN apt update && apt install --quiet -y \
+    libgtest-dev \
+    libgmock-dev \
+    lcov
+
+
+# Python deps
+RUN apt update && apt install --quiet -y \
+    python3 \
+    python3-dev \
+    python3-pip
+
+RUN pip3 install --upgrade \
+    wheel \
+    setuptools \
+    argcomplete
+
+# Python linter
+RUN pip3 install --upgrade \
+    pylint \
+    flake8 \
+    mypy
+
+# Python testing deps
+RUN pip3 install --upgrade \
+    pytest \
+    pytest-mock \
+    pytest-cov pytest-html \
+    pytest-pep8 \
+    pytest-pylint \
+    pytest-flake8
+
+# Python math deps
+RUN pip3 install --upgrade \
+    pandas tk matplotlib \
+    pyyaml \
+    numpy scipy
+
+
+# ROS tools
+RUN apt update && apt install --quiet -y \
+    python3-setuptools \
+    python3-bloom \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    python3-vcstool
+
+# # Install Gazebo Classic
+# RUN apt install --quiet -y \
+#     gazebo11 libgazebo11-dev \
+#     ros-${ROS_DISTRO}-gazebo-dev \
+#     ros-${ROS_DISTRO}-gazebo-plugins \
+#     ros-${ROS_DISTRO}-gazebo-msgs \
+#     ros-${ROS_DISTRO}-gazebo-ros-pkgs \
+#     ros-${ROS_DISTRO}-gazebo-ros
+
+# # Install Gazebo Ignition (Experimental)
+# # RUN apt install --quiet -y ros-${ROS_DISTRO}-ros-ign
+
+
+# #! px4-stage
+# FROM ubuntu-stage as px4-stage
+
+RUN apt update && apt install --quiet -y python3-future
+
+RUN apt update && apt install --quiet -y \
+    openjdk-11-jdk
+
+#todo other deps -> TO CHECK
+RUN apt update && apt install --quiet -y \
+    lightdm \
+    libboost-all-dev \
+    libeigen3-dev \
+    libflann-dev \
+    libqhull-dev \
+    libvtk6-dev \
+	astyle \
+	libxml2-dev \
+	libxml2-utils \
+	ninja-build \
+	rsync \
+	shellcheck \
+    dmidecode \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav \
+    libgstreamer-plugins-base1.0-dev \
+    libimage-exiftool-perl \
+    protobuf-compiler \
+    libusb-dev \
+    libusb-1.0-0-dev \
+    libgtk-3-dev \
+    libglfw3-dev \
+    libudev-dev \
+    musl-dev \
+    libffi-dev \
+    libbsd-dev \
+    libx11-dev \
+    libxrandr-dev \
+    libxi-dev \
+    libxinerama-dev \
+    libc-dev
+
+RUN pip3 install --upgrade \
+    kconfiglib \
+    pyros-genmsg \
+    empy \
+    jsonschema \
+    jinja2 \
+    toml
+
+## INSTALL PX4 dependencies
+## install Gradle (Required to build Fast-RTPS-Gen)
+# TODO: Try gradle-6.8.3
+ENV GRADLE_VERSION="6.3-rc-4"
+RUN wget -q "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle-${GRADLE_VERSION}-bin.zip \
+	&& mkdir /opt/gradle \
+	&& cd /tmp \
+	&& unzip -d /opt/gradle gradle-${GRADLE_VERSION}-bin.zip \
+	&& rm -rf /tmp/*
+
+ENV PATH "/opt/gradle/gradle-${GRADLE_VERSION}/bin:$PATH"
+
+## Intall foonathan_memory from source as it is required to Fast-RTPS >= 1.9
+ENV FOONATHAN_VERSION="v1.3.0"
+RUN git clone --recursive https://github.com/eProsima/foonathan_memory_vendor.git && \
+    cd foonathan_memory_vendor && mkdir build && cd build && \
+    cmake .. && cmake --build . --target install -- -j $(nproc) && ldconfig && rm -rf /tmp/*
+
+## Intall Fast-DDS (Fast-RTPS 2.0.2)
+ENV FASTDDS_VERSION="v2.0.2"
+RUN git clone --recursive https://github.com/eProsima/Fast-DDS.git -b $FASTDDS_VERSION && \
+    cd Fast-DDS && mkdir build && cd build && cmake -DTHIRDPARTY=ON -DSECURITY=ON .. && \
+    cmake --build . --target install -- -j $(nproc) && rm -rf /tmp/* && rm -rf Fast-DDS
+
+## Intall Fast-RTPS-Gen 1.0.4
+ENV FASTDDS_GEN_VERSION="v1.0.4"
+RUN git clone --recursive https://github.com/eProsima/Fast-DDS-Gen.git -b $FASTDDS_GEN_VERSION && \
+    cd Fast-DDS-Gen && gradle assemble && gradle install && rm -rf /tmp/*
+
+RUN export PATH=/home/$UBUNTU_USER/Fast-DDS-Gen/scripts:$PATH
+RUN echo "export PATH=${WORKSPACE}/Fast-DDS-Gen/scripts:$PATH" >> /home/$UBUNTU_USER/.bashrc
+
+# ## Setup XRCE-DDS Agent & Client
+# RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+# RUN cd Micro-XRCE-DDS-Agent && mkdir build && cd build && cmake .. && make && make install && ldconfig /usr/local/lib/
+
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libssl-dev \
+    libusb-1.0-0-dev \
+    pkg-config \
+    libgtk-3-dev \
+    libglfw3-dev \
+    libudev-dev \
+    python3-dev \
+    python3-numpy
+
+RUN apt-get update && apt-get install -y \
+    lsb  \
+    unzip \
+    wget \
+    gnupg2 \
+    gnupg \
+    curl \
+    sudo 
+
+RUN git clone https://github.com/IntelRealSense/librealsense.git && \
+    cd librealsense && \
+    git checkout v2.53.1
+
+
+# # build deps
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    musl-dev \
+    libffi-dev \
+    libbsd-dev \
+    libusb-dev \
+    libx11-dev \
+    libgtk-3-dev \
+    libssl-dev \
+    libusb-1.0-0-dev \
+    libudev-dev \
+    pkg-config \
+    libxrandr-dev \
+    libxinerama-dev \
+    dialog apt-utils -y \
+    libxi-dev \
+    libc-dev \
+    && true
+
+
+RUN cd /librealsense \
+    && ./scripts/setup_udev_rules.sh \
+    && echo 'hid_sensor_custom' | sudo tee -a /etc/modules \
+    && mkdir build && cd build \
+    && cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true -DCMAKE_BUILD_TYPE=Release -DBUILD_WITH_CUDA=bool:true \
+    && make -j4 all install \
+    && echo "/lib:/usr/local/lib:/usr/lib" >>/etc/ld-musl-$(uname -m).path \
+    && echo "/opt/apriltag/current/lib64" >>/etc/ld-musl-$(uname -m).path \
+    && echo "/opt/librealsense/current/lib64" >>/etc/ld-musl-$(uname -m).path \
+    && true
+
+RUN apt-get update && \
+    apt-get install -y libpcl-dev \
+    ros-${ROS_DISTRO}-nav2-msgs \
+    ros-${ROS_DISTRO}-pcl-conversions \
+    ros-${ROS_DISTRO}-octomap-*
+
+RUN apt-get update && \
+    apt-get install -y python3-genmsg
+
+RUN apt-get update && \
+    apt-get install -y ros-${ROS_DISTRO}-diagnostic-updater
+
+RUN git clone https://github.com/jbeder/yaml-cpp.git && \
+    cd yaml-cpp && \
+    mkdir build && cd build \
+    && cmake .. \
+    && make \
+    && make install
+
+# Range Finder dependeces
+
+RUN pip install smbus2
+RUN pip install vl53l1x
+
+########################
+# FINAL CONFIGURATIONS #
+########################
+
+# Clean
+RUN apt -y autoremove \
+	&& apt autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+
+# Set user
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+
+# Set .bashrc
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/$UBUNTU_USER/.bashrc
+
+# Set entrypoint
+COPY ./docker/entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
+
+ENV force_color_prompt=yes
+CMD ["bash"]

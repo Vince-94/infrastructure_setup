@@ -45,18 +45,25 @@ RUN apt install --quiet -y \
     build-essential \
     clang \
     cmake \
-    ccache
+    ccache \
+	ninja-build
 
 # C++ linter
 RUN apt install --quiet -y \
     clang-tidy clang-tools \
-    cppcheck
+    cppcheck \
+    astyle
 
 # C++ testing deps
 RUN apt install --quiet -y \
     libgtest-dev \
     libgmock-dev \
     lcov
+
+# C++ common lib
+RUN apt install --quiet -y \
+    libboost-all-dev \
+    libeigen3-dev
 
 # Python deps
 RUN apt install --quiet -y \
@@ -88,6 +95,14 @@ RUN pip3 install --upgrade \
     pyyaml \
     numpy scipy
 
+# Python parsers
+RUN pip3 install --upgrade \
+    pyyaml \
+    jsonschema \
+    jinja2 \
+    toml
+
+
 # Python system control deps
 RUN pip3 install --upgrade \
     qpsolvers \
@@ -109,12 +124,11 @@ RUN pip3 install --upgrade \
 RUN pip3 install vcstool colcon-common-extensions
 
 
-# #! gazebo-stage
+#! gazebo-stage
 # FROM base-stage as gazebo-stage
 
 
-
-# #! ignition-stage
+#! ignition-stage
 # FROM base-stage as ignition-stage
 
 # Install Gazebo Ignition
@@ -132,24 +146,82 @@ RUN usermod -aG root $UBUNTU_USER
 RUN apt install --quiet -y bash-completion
 
 
-##############
-# ENTRYPOINT #
-##############
 
-RUN add-apt-repository universe
+#! px4-stage
+# FROM base-stage as px4-stage
 
-# Configurations
-#TODO hardcoded
-# COPY .vscode/ $HOME/workspace/.vscode/
+RUN apt install --quiet -y python3-future
+
+RUN apt install --quiet -y openjdk-11-jdk
+
+# Data serialization
+RUN apt install --quiet -y \
+    protobuf-compiler
+
+# X11
+RUN apt install --quiet -y \
+    libx11-dev \
+    libxrandr-dev \
+    libxi-dev \
+    libxinerama-dev
+
+# ROS
+RUN pip3 install --upgrade \
+    pyros-genmsg
+
+# Others
+RUN pip3 install --upgrade \
+    empy
+
 
 # Clean
 RUN apt -y autoremove \
 	&& apt clean autoclean \
 	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
+
+#! px4-1.14-stage (https://docs.px4.io/main/en/ros/ros2_comm.html#humble)
+# FROM base-stage as px4-1.14-stage
+
+#TODO PX4 Flight controller (NEW)
+RUN pip3 install --upgrade kconfiglib
+
 # Set user
 USER $UBUNTU_USER
 WORKDIR /home/$UBUNTU_USER
+
+# Clone PX4 stack
+RUN git clone --recursive https://github.com/PX4/PX4-Autopilot.git
+RUN echo $UBUNTU_PSW | sudo -S bash PX4-Autopilot/Tools/setup/ubuntu.sh
+# RUN echo $UBUNTU_PSW | sudo -S bash PX4-Autopilot/Tools/setup/ubuntu.sh --no-sim-tools
+RUN cd PX4-Autopilot/ && make px4_sitl
+#TODO delete source and intermediate files
+
+
+# Setup Micro XRCE-DDS Agent & Client
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+RUN cd Micro-XRCE-DDS-Agent \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && echo $UBUNTU_PSW | sudo -S make install \
+    && echo $UBUNTU_PSW | sudo -S ldconfig /usr/local/lib/
+
+
+
+
+
+#TODO ROS2
+# RUN apt install ros-dev-tools
+# RUN source /opt/ros/humble/setup.bash
+RUN echo "source /opt/ros/humble/setup.bash" >> .bashrc
+
+
+
+##############
+# ENTRYPOINT #
+##############
 
 # Set entrypoint
 COPY ./docker/ros2_entrypoint.sh /

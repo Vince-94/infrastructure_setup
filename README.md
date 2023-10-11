@@ -3,7 +3,7 @@
 - [Configuring Environment](#configuring-environment)
   - [Docker](#docker)
     - [Commands](#commands)
-    - [Images](#images)
+    - [Dockerfile](#dockerfile)
   - [Roadmap](#roadmap)
 
 
@@ -29,56 +29,64 @@ source docker.sh <command>
 | `help`       | show script commands                                         |
 
 
-### Images
-* Ubuntu:
+### Dockerfile
+* Dockerfile
   * ubuntu:22.04
-* [ROS2](https://github.com/osrf/docker_images/tree/3f4fbca923d80f834f3a89b5960bad5582652519):
-  * humble:
-    * ros:humble-ros-core
-    * ros:humble
-    * ros:humble-perception
-    * osrf/ros:humble-desktop
-    * osrf/ros:humble-desktop-full
+* Dockerfile_ros
+  * ros:humble-ros-core -> NOT TESTED
+  * ros:humble -> NOT TESTED
+  * ros:humble-perception -> NOT TESTED
+  * osrf/ros:humble-desktop -> NOT TESTED
+  * osrf/ros:humble-desktop-full -> development image
+* Dockerfile_ros_deployment
+
+
+Links:
+* [ROS2 DockerHub](https://github.com/osrf/docker_images/tree/3f4fbca923d80f834f3a89b5960bad5582652519)
+
 
 
 
 ## Roadmap
 - [ ] Improve dockerfile in order to build libs and delete source
 - [ ] Create dockerfile for deployment (arm)
-- [ ] Improve architecture
+- Dockerfile renaming:
+  - [ ] Dockerfile_ros -> Dockerfile_development
+  - [ ] config.env -> development_conf.env + user_conf.env + project_conf.env
+- [x] Improve architecture
   - [x] load at runtime the project workspace
-  - [ ] load at runtime the external libraries
+  - [x] load at runtime the external libraries
   ```sh
-  # local architecture
-  HOME/
-    infrastructure_setup/
-      .devcontainer/
-      docker/
-        Dockefile
-        ros2_entrypoint.sh
-        config.env
-      config/
-        .vscode/
-        colcon.sh
-      docker.sh
-      README.md
-    workspace/
-      src/
-        pkg/
-    libs/
-      src/
+    # local architecture
+    HOME/
+    ├── infrastructure_setup/
+    │   ├── .devcontainer/
+    │   ├── docker/
+    │   │   ├── Dockefile
+    │   │   ├── ros2_entrypoint.sh
+    │   │   └── config.env
+    │   ├── config/
+    │   │   └── .vscode/
+    │   │       └── colcon.sh
+    │   ├── docker.sh
+    │   └── README.md
+    ├── workspace/
+    │   └── src/
+    │       └── pkg/
+    └── libs/
+        └── src/
   ```
 
   ```sh
   # container architecture
-  HOME/
-    workspace/
-      .vscode/
-      src/
-        pkg/
-      colcon.sh
-    libs/
-      src/
+    HOME/
+    ├── workspace/
+    │   ├── .vscode/
+    │   ├── src/
+    │   │   └── pkg/
+    │   └── colcon.sh
+    └── libs/
+        └── src/
   ```
 - [ ] Implement .devcontainer (WSL -> VS Code GUI -> Docker container -> VS Code server)
   - https://www.youtube.com/playlist?list=PL2dJBq8ig-vihvDVw-D5zAYOArTMIX0FA

@@ -26,10 +26,13 @@ fi
 # Source ROS2
 source /opt/ros/$ROS_DISTRO/setup.bash
 
+# Export Ignition envs
+export IGN_CONFIG_PATH=/usr/share/ignition
+
 
 #! Commands
-PKG_SKIP="realsense2_camera gazebo_simulation"
-PKG_SELECT="realsense2_camera"
+PKG_SKIP=""
+PKG_SELECT=""
 
 if [[ $1 == "build" ]]; then                # build the workspace
     echo "Build ROS2 workspace"

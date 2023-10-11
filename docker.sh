@@ -35,7 +35,14 @@ if [[ $1 == "build" ]]; then
     - Dockerimage name: $DOCKER_IMAGE:$TAG
     - Stage:            $BUILD_STAGE
     "
-    docker build --rm \
+
+    # if [[ $2 == "-f" ]]; then
+    #     PULL_CMD=--pull
+    # else
+    #     PULL_CMD=
+    # fi
+
+    docker build --pull --rm \
                  --build-arg UBUNTU_RELEASE=$UBUNTU_RELEASE \
                  --build-arg ROS_DISTRO=$ROS_DISTRO \
                  --build-arg UBUNTU_USER=$UBUNTU_USER \
@@ -92,7 +99,7 @@ elif [[ $1 == "run" ]]; then
     fi
 
     docker run  -it --rm --privileged \
-                -h $USER \
+                -h $UBUNTU_USER \
                 -e LOCAL_USER_ID=$UBUNTU_UID \
                 -e USER=$UBUNTU_USER \
                 -e UID=${UBUNTU_UID} \
@@ -182,6 +189,7 @@ elif [[ $1 == "clean" ]]; then
     echo "Clean all the not needed images and container"
     docker image prune -f
     docker container prune -f
+    docker system prune -f
 
 # info
 elif [[ $1 == "info" ]]; then

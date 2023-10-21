@@ -121,7 +121,6 @@ RUN pip3 install --upgrade \
 # RUN pip3 install --upgrade osqp
 
 
-RUN pip3 install vcstool colcon-common-extensions
 
 
 #! gazebo-stage
@@ -136,21 +135,12 @@ RUN pip3 install vcstool colcon-common-extensions
 # RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 # RUN apt update
 
-RUN apt install -y ros-${ROS_DISTRO}-ros-ign
 
-# Open html links
-RUN apt install --quiet -y lynx
-RUN usermod -aG root $UBUNTU_USER
-
-# Install git
-RUN apt install --quiet -y bash-completion
 
 
 
 #! px4-stage
 # FROM base-stage as px4-stage
-
-RUN apt install --quiet -y python3-future
 
 RUN apt install --quiet -y openjdk-11-jdk
 
@@ -211,11 +201,6 @@ RUN cd Micro-XRCE-DDS-Agent \
 
 
 
-
-#TODO ROS2
-# RUN apt install ros-dev-tools
-# RUN source /opt/ros/humble/setup.bash
-RUN echo "source /opt/ros/humble/setup.bash" >> .bashrc
 
 
 

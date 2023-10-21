@@ -1,23 +1,23 @@
 #!/bin/bash
 set -e
 
-# Ubuntu config
-echo "User credentials:
-- HOSTNAME: $HOSTNAME
-- USERNAME: $USER (UID=$UID, GID=$GROUPS)
-"
-
-# Source bashrc
-# source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
+# Source
 source ~/.bashrc
 
-# Print information
+# git configuration
+git config --global core.editor "code --wait"
+
+# Source ROS2 workspace
+if [[ -d "../install" ]]; then
+	source ~/ros2_esa_ws/install/setup.sh
+fi
+
+# Ubuntu info
 if [[ $USER == $UBUNTU_USER ]] && [[ $UID == $UBUNTU_UID ]]; then
 	echo "User credentials:
-	- USERNAME: ($USER:$UID)
-	- HOSTNAME: $HOSTNAME
-	- PASSWORD: $UBUNTU_PSW
-	"
+    - USERNAME: $HOSTNAME: ($USER:$UID)
+    - PASSWORD: $UBUNTU_PSW
+    "
 else
 	echo "User is not set correctly!"
 	if ![[ $USER == $UBUNTU_USER ]]; then
@@ -27,6 +27,12 @@ else
 	fi
 	return
 fi
+
+# ROS2 info
+echo "ROS2 environment:
+    - ROS $ROS_VERSION: $ROS_DISTRO
+"
+
 
 if [[ -n "$CI" ]]; then
     exec /bin/bash

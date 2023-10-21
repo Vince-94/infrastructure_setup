@@ -1,131 +1,199 @@
 #! base-stage
-ARG UBUNTU_RELEASE
-
-FROM ubuntu:$UBUNTU_RELEASE as base-stage
+ARG BASE_IMAGE
+FROM $BASE_IMAGE as base-stage
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG UBUNTU_USER=docker_user
-ARG UBUNTU_PSW=docker
+ARG UBUNTU_PSW=password
 ARG UBUNTU_UID=1000
 ARG UBUNTU_GID=1000
 
 ENV UBUNTU_USER=$UBUNTU_USER
 ENV UBUNTU_PSW=$UBUNTU_PSW
 ENV UBUNTU_UID=$UBUNTU_UID
-ENV UBUNTU_GID=1000
+ENV UBUNTU_GID=$UBUNTU_GID
 
 # Create local user docker_user
 RUN useradd -r -m -d /home/$UBUNTU_USER -s /bin/bash -g root -G sudo -G dialout -u $UBUNTU_UID -p "$(openssl passwd -6 $UBUNTU_PSW)" $UBUNTU_USER
 
 # Add local user to system groups
 RUN usermod -aG sudo $UBUNTU_USER
+RUN usermod -aG root $UBUNTU_USER
 RUN usermod -aG dialout $UBUNTU_USER
 RUN usermod -aG tty $UBUNTU_USER
 RUN usermod -aG audio $UBUNTU_USER
 RUN usermod -aG video $UBUNTU_USER
-
-# Update
-# RUN add-apt-repository universe
-RUN apt update && \
-	apt upgrade -y
 
 
 ########################
 # INSTALL DEPENDENCIES #
 ########################
 
+# Update
+RUN apt update && \
+	apt upgrade -y
+
+RUN apt install --quiet -y \
+    sudo software-properties-common lsb-release
+RUN add-apt-repository universe
+
 # Ubuntu deps
 RUN apt install --quiet -y \
-    sudo software-properties-common lsb-release \
     apt-transport-https ca-certificates gnupg gnupg2 gnupg-agent libssl-dev \
-    curl file wget zip unzip pkg-config openssh-client openssh-server \
+    git curl file wget zip unzip pkg-config openssh-client openssh-server \
     xterm tmux gdb valgrind \
-    htop net-tools nmap
+    htop net-tools nmap lynx \
+    libx11-dev
+
+RUN apt install --quiet -y \
+    bash-completion
+RUN echo "source /usr/share/bash-completion/completions/git" >> .bashrc
 
 # C++ deps
 RUN apt install --quiet -y \
-    build-essential \
-    clang \
-    cmake \
-    ccache
+    build-essential clang cmake ccache ninja-build
 
 # C++ linter
 RUN apt install --quiet -y \
     clang-tidy clang-tools \
-    cppcheck
+    cppcheck \
+    astyle
 
 # C++ testing deps
+RUN apt install --quiet -y libgtest-dev libgmock-dev lcov
+
+# C++ common lib
 RUN apt install --quiet -y \
-    libgtest-dev \
-    libgmock-dev \
-    lcov
+    libboost-all-dev \
+    libeigen3-dev
 
 # Python deps
 RUN apt install --quiet -y \
-    python3 \
-    python3-dev \
-    python3-pip
-
+    python3 python3-dev python3-pip python3-future
 RUN pip3 install --upgrade \
-    wheel \
-    setuptools \
-    argcomplete
+    wheel setuptools argcomplete
 
 # Python linter
 RUN pip3 install --upgrade \
-    pylint \
-    flake8 \
-    mypy
+    pylint flake8 mypy
 
+# Python test
 RUN pip3 install --upgrade \
-    pytest \
-    pytest-mock \
-    pytest-cov pytest-html \
-    pytest-pep8 \
-    pytest-pylint \
-    pytest-flake8
+    pytest==7.1.3 pytest-mock pytest-cov pytest-html \
+    pytest-pep8 pytest-pylint pytest-flake8
 
+# Python formatter
 RUN pip3 install --upgrade \
-    pandas tk matplotlib \
-    pyyaml \
+    black
+
+# Python utils libs
+RUN pip3 install --upgrade \
+    pandas pyyaml jsonschema jinja2 toml
+
+# Python visualization libs
+RUN pip3 install --upgrade \
+    tk matplotlib
+
+# Python math libs
+RUN pip3 install --upgrade \
     numpy scipy
-
-# Python system control deps
-# RUN pip3 install --upgrade \
-#     qpsolvers \
-#     quadprog gurobipy osqp cvxopt cvxpy
-
-# # install CVXOPT (https://cvxopt.org/)
-# RUN pip3 install --upgrade cvxopt
-
-# # install CVXPY (https://www.cvxpy.org/index.html)
-# RUN pip3 install --upgrade cvxpy
-
-# # install Guroby ()
-# RUN pip3 install --upgrade gurobipy
-
-# # install osqp ()
-# RUN pip3 install --upgrade osqp
-
-
-# Bazel (https://bazel.build/install/ubuntu)
-# RUN curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel-archive-keyring.gpg
-# RUN mv bazel-archive-keyring.gpg /usr/share/keyrings
-# RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-# RUN apt update && apt install --quiet -y bazel
-
-# Open html links
-RUN apt install --quiet -y lynx
-
-
-##############
-# ENTRYPOINT #
-##############
 
 # Clean
 RUN apt -y autoremove \
 	&& apt clean autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+
+
+#! ros-stage
+FROM base-stage as ros-stage
+
+# Update
+RUN apt update && \
+	apt upgrade -y
+
+RUN apt install --quiet -y \
+    ros-dev-tools
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> .bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> .bashrc
+
+ENV RCUTILS_COLORIZED_OUTPUT=1
+ENV RCUTILS_LOGGING_USE_STDOUT=1
+ENV RCUTILS_LOGGING_BUFFERED_STREAM=1
+# ENV RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"
+
+# Ignition Gazebo
+# RUN apt install -y ros-${ROS_DISTRO}-ros-ign
+
+# Ignition Gazebo: Garden
+RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+RUN apt update
+RUN apt install -y gz-garden
+RUN apt install -y ros-${ROS_DISTRO}-ros-gzgarden
+
+# "http://models.gazebosim.org":"https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/"
+ENV GZ_VERSION=garden
+ENV GZ_CONFIG_PATH=/usr/share/gz
+ENV GZ_SIM_RESOURCE_PATH="$HOME/.gz/sim/models"
+ENV GZ_SIM_SYSTEM_PLUGIN_PATH="$HOME/.gz/sim/plugins"
+ENV GZ_SIM_SERVER_CONFIG_PATH=
+ENV GZ_GUI_PLUGIN_PATH="$HOME/.gz/gui/plugins"
+ENV GZ_GUI_RESOURCE_PATH=
+
+
+# Clean
+USER root
+RUN apt -y autoremove && apt clean autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+
+# Set user
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+
+# Set entrypoint
+COPY ./docker/entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
+
+ENV force_color_prompt=yes
+CMD ["bash"]
+
+
+#! px4-stage (https://docs.px4.io/main/en/ros/ros2_comm.html#humble)
+FROM ros-stage as px4-stage
+
+# Update
+USER root
+RUN apt update && apt upgrade -y
+
+# System deps
+RUN pip3 install --upgrade \
+    kconfiglib pyros-genmsg empy
+
+# Set user
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+
+# Clone PX4 stack
+RUN git clone --recursive https://github.com/PX4/PX4-Autopilot.git
+RUN echo $UBUNTU_PSW | sudo -S bash PX4-Autopilot/Tools/setup/ubuntu.sh
+RUN cd PX4-Autopilot/ && make px4_sitl
+
+# Setup Micro XRCE-DDS Agent & Client
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+RUN cd Micro-XRCE-DDS-Agent \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && echo $UBUNTU_PSW | sudo -S make install \
+    && echo $UBUNTU_PSW | sudo -S ldconfig /usr/local/lib/
+
+
+# Clean
+USER root
+RUN apt -y autoremove && apt clean autoclean \
 	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
 # Set user

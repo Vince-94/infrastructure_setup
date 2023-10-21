@@ -30,15 +30,12 @@ source docker.sh <command>
 
 
 ### Dockerfile
-* Dockerfile
-  * ubuntu:22.04
-* Dockerfile_ros
-  * ros:humble-ros-core -> NOT TESTED
-  * ros:humble -> NOT TESTED
-  * ros:humble-perception -> NOT TESTED
-  * osrf/ros:humble-desktop -> NOT TESTED
-  * osrf/ros:humble-desktop-full -> development image
-* Dockerfile_ros_deployment
+* Dockerfile_ros (https://www.ros.org/reps/rep-2001.html#humble-hawksbill-may-2022-may-2027)
+  * ros:humble-ros-core
+  * ros:humble
+  * ros:humble-perception
+  * osrf/ros:humble-desktop
+  * osrf/ros:humble-desktop-full
 
 
 Links:
@@ -97,3 +94,6 @@ Links:
 - [x] Install git in the container and enable auto-completation
   - sudo apt install -y bash-completion
   - source /usr/share/bash-completion/completions/git
+- [ ] Different installation of gazebo (fortress, garden)
+- [ ] Set env of Gazebo
+

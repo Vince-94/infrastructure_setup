@@ -48,7 +48,7 @@ RUN apt install --quiet -y \
 
 RUN apt install --quiet -y \
     bash-completion
-RUN echo "source /usr/share/bash-completion/completions/git" >> .bashrc
+RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
 
 # C++ deps
 RUN apt install --quiet -y \
@@ -115,8 +115,8 @@ RUN apt update && \
 RUN apt install --quiet -y \
     ros-dev-tools
 
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> .bashrc
-RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> .bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
 
 ENV RCUTILS_COLORIZED_OUTPUT=1
 ENV RCUTILS_LOGGING_USE_STDOUT=1

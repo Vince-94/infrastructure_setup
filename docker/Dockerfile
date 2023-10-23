@@ -200,6 +200,10 @@ RUN apt -y autoremove && apt clean autoclean \
 USER $UBUNTU_USER
 WORKDIR /home/$UBUNTU_USER
 
+RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
 # Set entrypoint
 COPY ./docker/entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]

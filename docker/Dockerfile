@@ -142,6 +142,16 @@ ENV GZ_SIM_SERVER_CONFIG_PATH=
 ENV GZ_GUI_PLUGIN_PATH="$HOME/.gz/gui/plugins"
 ENV GZ_GUI_RESOURCE_PATH=
 
+# Plotjuggler
+RUN apt install -y ros-$ROS_DISTRO-plotjuggler-ros
+
+# foxglove
+#   https://docs.ros.org/en/humble/How-To-Guides/Visualizing-ROS-2-Data-With-Foxglove-Studio.html
+#   https://docs.foxglove.dev/docs/connecting-to-data/frameworks/ros2/
+RUN wget https://github.com/foxglove/studio/releases/download/v1.75.0/foxglove-studio-1.75.0-linux-amd64.deb
+RUN apt install -y ./foxglove-studio-*.deb
+RUN rm /foxglove-studio-*.deb
+RUN apt install -y ros-$ROS_DISTRO-foxglove-bridge
 
 # Clean
 USER root
@@ -189,7 +199,6 @@ RUN cd Micro-XRCE-DDS-Agent \
     && make \
     && echo $UBUNTU_PSW | sudo -S make install \
     && echo $UBUNTU_PSW | sudo -S ldconfig /usr/local/lib/
-
 
 # Clean
 USER root

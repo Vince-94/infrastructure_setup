@@ -163,8 +163,8 @@ USER $UBUNTU_USER
 WORKDIR /home/$UBUNTU_USER
 
 # Set entrypoint
-COPY ./docker/entrypoint.sh /
-ENTRYPOINT ["/entrypoint.sh"]
+COPY ./docker/ros2_entrypoint.sh /
+ENTRYPOINT ["/ros2_entrypoint.sh"]
 
 ENV force_color_prompt=yes
 CMD ["bash"]
@@ -214,8 +214,8 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
 
 # Set entrypoint
-COPY ./docker/entrypoint.sh /
-ENTRYPOINT ["/entrypoint.sh"]
+COPY ./docker/ros2_entrypoint.sh /
+ENTRYPOINT ["/ros2_entrypoint.sh"]
 
 ENV force_color_prompt=yes
 CMD ["bash"]

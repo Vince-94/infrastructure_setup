@@ -7,6 +7,11 @@ source ~/.bashrc
 # git configuration
 git config --global core.editor "code --wait"
 
+# Source ROS2 workspace
+if [[ -d "../install" ]]; then
+	source ~/ros2_esa_ws/install/setup.sh
+fi
+
 # Ubuntu info
 if [[ $USER == $UBUNTU_USER ]] && [[ $UID == $UBUNTU_UID ]]; then
 	echo "User credentials:
@@ -22,6 +27,11 @@ else
 	fi
 	return
 fi
+
+# ROS2 info
+echo "ROS2 environment:
+    - ROS $ROS_VERSION: $ROS_DISTRO
+"
 
 
 if [[ -n "$CI" ]]; then

@@ -12,7 +12,7 @@ DOCKER_WS_PATH=$DOCKER_HOME/$WS_NAME
 PROJECT_FOLDER=$REPO_AUTHOR/$REPO_NAME
 
 # Docker file/image/container
-DOCKER_FILE=Dockerfile
+# DOCKER_FILE=Dockerfile
 DOCKER_IMAGE=${PROJECT_FOLDER}-image
 DOCKER_REG_IMAGE=registry.gitlab.com/drone5205538/infrastructure_setup
 DOCKER_CONTAINER=${REPO_NAME}-container
@@ -71,7 +71,7 @@ elif [[ $1 == "run" ]]; then
         DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
     else
         echo "ERROR: No workspace provided!"
-        exit 1
+        return
     fi
 
     # Check libraries folder validity

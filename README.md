@@ -4,6 +4,8 @@
   - [Docker](#docker)
     - [Commands](#commands)
     - [Dockerfile](#dockerfile)
+    - [Configuration](#configuration)
+    - [Reference](#reference)
   - [Roadmap](#roadmap)
 
 
@@ -37,6 +39,15 @@ source docker.sh <command>
   * osrf/ros:humble-desktop
   * osrf/ros:humble-desktop-full
 
+
+### Configuration
+- DOCKER_IMAGE=$REPO_AUTHOR/$REPO_NAME-image
+- DOCKER_CONTAINER=${REPO_NAME}-container
+- LIBS_PATH=$WS_PATH/$WS_NAME
+- CONFIG_PATH=$HOME/libs
+
+
+### Reference
 
 Links:
 * [ROS2 DockerHub](https://github.com/osrf/docker_images/tree/3f4fbca923d80f834f3a89b5960bad5582652519)

@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "purpose":["debug-in-terminal"]
+        },
+        {
             "name": "C++ Debugger",
             "request": "launch",
             "type": "cppdbg",
@@ -17,7 +27,7 @@
             "type": "cppdbg",
             "request": "attach",
             "processId": "${input:GetPID}",
-            "program"  : "${input:GetPath}",
+            "program": "${input:GetPath}",
             "MIMode": "gdb",
             // "sudo": true,
             "setupCommands": [
@@ -27,7 +37,7 @@
                     "ignoreFailures": true
                 },
                 {
-                    "description":  "Set Disassembly Flavor to Intel",
+                    "description": "Set Disassembly Flavor to Intel",
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
@@ -56,5 +66,4 @@
             }
         }
     ],
-
 }

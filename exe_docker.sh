@@ -98,7 +98,7 @@ elif [[ $1 == "run" ]]; then
     fi
 
     docker run  -it --rm --privileged \
-                -h $UBUNTU_USER \
+                -h $HOSTNAME \
                 -e LOCAL_USER_ID=$UBUNTU_UID \
                 -e USER=$UBUNTU_USER \
                 -e UID=${UBUNTU_UID} \

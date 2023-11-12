@@ -21,11 +21,11 @@ if [[ $USER == $UBUNTU_USER ]] && [[ $UID == $UBUNTU_UID ]]; then
 else
 	echo "User is not set correctly!"
 	if ![[ $USER == $UBUNTU_USER ]]; then
-		echo "$USER is not $UBUNTU_USER"
+		echo "Username mismatch: $USER is not $UBUNTU_USER"
 	else
-		echo "$UID is not $UBUNTU_UID"
+		echo "UID mismatch: $UID is not $UBUNTU_UID"
 	fi
-	return
+	exit
 fi
 
 # ROS2 info

@@ -112,6 +112,10 @@ RUN pip3 install --upgrade \
 RUN pip3 install --upgrade \
     scikit-learn
 
+# C Arm GCC Compiler
+RUN apt install --quiet -y gcc-arm-linux-gnueabi
+# RUN apt install --quiet -y gcc-arm-none-eabi
+
 
 # Clean
 RUN apt -y autoremove \

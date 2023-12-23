@@ -166,6 +166,10 @@ WORKDIR /home/$UBUNTU_USER
 COPY ./docker/ros2_entrypoint.sh /
 ENTRYPOINT ["/ros2_entrypoint.sh"]
 
+RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
 ENV force_color_prompt=yes
 CMD ["bash"]
 

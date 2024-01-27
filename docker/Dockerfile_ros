@@ -15,7 +15,11 @@ ENV UBUNTU_UID=$UBUNTU_UID
 ENV UBUNTU_GID=$UBUNTU_GID
 
 # Create local user docker_user
-RUN useradd -r -m -d /home/$UBUNTU_USER -s /bin/bash -g root -G sudo -G dialout -u $UBUNTU_UID -p "$(openssl passwd -6 $UBUNTU_PSW)" $UBUNTU_USER
+RUN echo "UBUNTU_USER: $UBUNTU_USER"
+RUN echo "UBUNTU_UID: $UBUNTU_UID"
+RUN echo "UBUNTU_PSW: $UBUNTU_PSW"
+
+RUN useradd -r -m -d "/home/$UBUNTU_USER" -s /bin/bash -g root -G sudo -G dialout -u $UBUNTU_UID -p "$(openssl passwd -6 "$UBUNTU_PSW")" $UBUNTU_USER
 
 # Add local user to system groups
 RUN usermod -aG sudo $UBUNTU_USER
@@ -152,6 +156,18 @@ RUN wget https://github.com/foxglove/studio/releases/download/v1.75.0/foxglove-s
 RUN apt install -y ./foxglove-studio-*.deb
 RUN rm /foxglove-studio-*.deb
 RUN apt install -y ros-$ROS_DISTRO-foxglove-bridge
+
+# pigpio
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+RUN wget https://github.com/joan2937/pigpio/archive/master.zip
+RUN unzip master.zip
+RUN cd pigpio-master && make
+USER root
+RUN cd pigpio-master && make install
+RUN rm -r master.zip
+RUN rm -r pigpio-master
+
 
 # Clean
 USER root

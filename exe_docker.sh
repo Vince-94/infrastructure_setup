@@ -1,6 +1,12 @@
 #!/bin/bash
 
-source docker/config.env
+# source exe_docker.sh <CMD> <PROJECT_NAME> <STAGE>
+
+source docker/config.env $2 $3
+
+if [ $? -ne 0 ]; then
+    return 1
+fi
 
 
 #! Environment variables

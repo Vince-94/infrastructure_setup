@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python Debugger",
             "type": "python",
             "request": "launch",
             "program": "${file}",
@@ -20,7 +20,8 @@
             "type": "cppdbg",
             "miDebuggerServerAddress": "localhost:3000",
             "cwd": "/",
-            "program": ""
+            "program": "",
+            "justMyCode": false
         },
         {
             "name": "(gdb) Ignition",

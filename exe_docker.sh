@@ -1,6 +1,12 @@
 #!/bin/bash
 
-source docker/config.env
+# source exe_docker.sh <CMD> <PROJECT_NAME> <STAGE>
+
+source docker/config.env $2 $3
+
+if [ $? -ne 0 ]; then
+    return 1
+fi
 
 
 #! Environment variables
@@ -64,10 +70,11 @@ elif [[ $1 == "run" ]]; then
     echo "Run $DOCKER_CONTAINER -> $DOCKER_IMAGE:$TAG
     "
     xhost +     # enable access to xhost from the container
+    echo
 
     # Check workspace folder validity
+    echo "Workspace dir: ${LOCAL_WS_PATH}"
     if [ -d "$LOCAL_WS_PATH" ]; then
-        echo "Workspace dir: ${LOCAL_WS_PATH}"
         DOCKER_VOLUMES="-v ${LOCAL_WS_PATH}:${DOCKER_WS_PATH}:rw"
     else
         echo "ERROR: No workspace provided!"
@@ -97,6 +104,9 @@ elif [[ $1 == "run" ]]; then
         done
     fi
 
+    # Docker container command
+    echo "Docker container cmd: $DOCKER_RUN_CMD"
+
     docker run  -it --rm --privileged \
                 -h $HOSTNAME \
                 -e LOCAL_USER_ID=$UBUNTU_UID \
@@ -116,7 +126,7 @@ elif [[ $1 == "run" ]]; then
                 --device /dev:/dev \
                 -w $DOCKER_WS_PATH \
                 --name $DOCKER_CONTAINER \
-                $DOCKER_IMAGE:$TAG /bin/bash
+                $DOCKER_IMAGE:$TAG $DOCKER_RUN_CMD
 
 # exec
 elif [[ $1 == "exec" ]]; then

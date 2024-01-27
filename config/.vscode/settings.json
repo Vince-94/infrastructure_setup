@@ -69,6 +69,29 @@
         "cinttypes": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
-    }
+        "variant": "cpp",
+        "core": "cpp",
+        "*.ipp": "cpp",
+        "valarray": "cpp",
+        "ranges": "cpp",
+        "strstream": "cpp",
+        "codecvt": "cpp",
+        "cfenv": "cpp",
+        "csignal": "cpp",
+        "shared_mutex": "cpp",
+        "dense": "cpp"
+    },
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.autoComplete.extraPaths": [
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
 }

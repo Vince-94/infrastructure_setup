@@ -156,7 +156,7 @@ elif [[ $1 == "install" ]]; then
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     sudo apt update
-    sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 	echo "Setting Docker permission/ownership"
 	sudo chown -R $USER:$USER $DOCKER_HOME/.docker      # set docker ownership

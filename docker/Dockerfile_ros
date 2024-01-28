@@ -15,10 +15,6 @@ ENV UBUNTU_UID=$UBUNTU_UID
 ENV UBUNTU_GID=$UBUNTU_GID
 
 # Create local user docker_user
-RUN echo "UBUNTU_USER: $UBUNTU_USER"
-RUN echo "UBUNTU_UID: $UBUNTU_UID"
-RUN echo "UBUNTU_PSW: $UBUNTU_PSW"
-
 RUN useradd -r -m -d "/home/$UBUNTU_USER" -s /bin/bash -g root -G sudo -G dialout -u $UBUNTU_UID -p "$(openssl passwd -6 "$UBUNTU_PSW")" $UBUNTU_USER
 
 # Add local user to system groups

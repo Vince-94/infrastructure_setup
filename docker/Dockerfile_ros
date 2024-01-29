@@ -44,7 +44,7 @@ RUN apt install --quiet -y \
     git curl file wget zip unzip pkg-config openssh-client openssh-server \
     xterm tmux gdb valgrind \
     htop net-tools nmap lynx \
-    libx11-dev
+    libx11-dev nano vim
 
 RUN apt install --quiet -y \
     bash-completion
@@ -158,6 +158,8 @@ CMD ["bash"]
 
 #! sim-stage
 FROM ros-stage as sim-stage
+
+USER root
 
 # Update
 RUN apt update && \

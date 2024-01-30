@@ -171,6 +171,10 @@ elif [[ $1 == "install" ]]; then
 
     sudo apt install -y x11-xserver-utils
 
+    if [ "$ARCH" == "x86_64" ]; then
+        sudo apt install -y qemu qemu-user-static binfmt-support  # install QEMU
+    fi
+
 # inspect
 elif [[ $1 == "inspect" ]]; then
     echo -e "Resume:"

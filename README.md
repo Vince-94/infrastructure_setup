@@ -14,10 +14,10 @@
 ### Commands
 
 ```sh
-source docker.sh <command>
+source exe_docker.sh COMMAND
 ```
 
-| Command      | Description                                                  |
+| COMMAND      | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
 | `build`      | build the Dockerfile to create the image (dockerimage)       |
 | `push`       | push dockerimage to GitLab container registry                |

@@ -44,7 +44,7 @@ RUN apt install --quiet -y \
     git curl file wget zip unzip pkg-config openssh-client openssh-server \
     xterm tmux gdb valgrind \
     htop net-tools nmap lynx \
-    libx11-dev nano vim
+    libx11-dev nano vim iputils-ping
 
 RUN apt install --quiet -y \
     bash-completion

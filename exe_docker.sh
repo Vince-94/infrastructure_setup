@@ -162,7 +162,7 @@ elif [[ $1 == "install" ]]; then
 	sudo chown -R $USER:$USER $DOCKER_HOME/.docker      # set docker ownership
 	sudo chmod -R g+rwx "$DOCKER_HOME/.docker"        	# set docker permissions
 
-	sudo apt autoremove
+	sudo apt autoremove -y
 
     echo "Configure Docker"
 	sudo groupadd docker                                # create the docker group

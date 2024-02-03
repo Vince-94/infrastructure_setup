@@ -103,6 +103,11 @@ RUN pip3 install --upgrade \
 RUN pip3 install --upgrade \
     numpy scipy
 
+# Enabling caching
+RUN echo "export CC=/usr/lib/ccache/gcc" >> ~/.bashrc
+RUN echo "export CXX=/usr/lib/ccache/g++" >> ~/.bashrc
+
+
 # Clean
 RUN apt -y autoremove \
 	&& apt clean autoclean \
@@ -111,6 +116,68 @@ RUN apt -y autoremove \
 
 #! ros-stage
 FROM base-stage as ros-stage
+
+# Update
+RUN apt update && \
+	apt upgrade -y
+
+RUN apt install --quiet -y \
+    ros-dev-tools
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
+ENV RCUTILS_COLORIZED_OUTPUT=1
+ENV RCUTILS_LOGGING_USE_STDOUT=1
+ENV RCUTILS_LOGGING_BUFFERED_STREAM=1
+# ENV RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"
+
+
+#! rpi-stage
+FROM ros-stage as rpi-stage
+
+# Update
+RUN apt update && \
+	apt upgrade -y
+
+
+# pigpio
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+RUN wget https://github.com/joan2937/pigpio/archive/master.zip
+RUN unzip master.zip
+RUN cd pigpio-master && make
+USER root
+RUN cd pigpio-master && make install
+RUN rm -r master.zip
+RUN rm -r pigpio-master
+
+RUN pigpio
+
+
+# Clean
+USER root
+RUN apt -y autoremove && apt clean autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+
+# Set user
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+
+# Set entrypoint
+COPY ./docker/ros2_entrypoint.sh /
+ENTRYPOINT ["/ros2_entrypoint.sh"]
+
+RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
+ENV force_color_prompt=yes
+CMD ["bash"]
+
+
+#! sim-stage
+FROM ros-stage as sim-stage
 
 # Update
 RUN apt update && \
@@ -185,57 +252,6 @@ ENTRYPOINT ["/ros2_entrypoint.sh"]
 RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
-
-ENV force_color_prompt=yes
-CMD ["bash"]
-
-
-#! px4-stage (https://docs.px4.io/main/en/ros/ros2_comm.html#humble)
-FROM ros-stage as px4-stage
-
-# Update
-USER root
-RUN apt update && apt upgrade -y
-
-# System deps
-RUN pip3 install --upgrade \
-    kconfiglib pyros-genmsg empy
-
-# Set user
-USER $UBUNTU_USER
-WORKDIR /home/$UBUNTU_USER
-
-# Clone PX4 stack
-RUN git clone --recursive https://github.com/PX4/PX4-Autopilot.git
-RUN echo $UBUNTU_PSW | sudo -S bash PX4-Autopilot/Tools/setup/ubuntu.sh
-RUN cd PX4-Autopilot/ && make px4_sitl
-
-# Setup Micro XRCE-DDS Agent & Client
-RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-RUN cd Micro-XRCE-DDS-Agent \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make \
-    && echo $UBUNTU_PSW | sudo -S make install \
-    && echo $UBUNTU_PSW | sudo -S ldconfig /usr/local/lib/
-
-# Clean
-USER root
-RUN apt -y autoremove && apt clean autoclean \
-	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
-
-# Set user
-USER $UBUNTU_USER
-WORKDIR /home/$UBUNTU_USER
-
-RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
-RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
-
-# Set entrypoint
-COPY ./docker/ros2_entrypoint.sh /
-ENTRYPOINT ["/ros2_entrypoint.sh"]
 
 ENV force_color_prompt=yes
 CMD ["bash"]

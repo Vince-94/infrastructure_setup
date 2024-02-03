@@ -1,0 +1,49 @@
+#! px4-stage (https://docs.px4.io/main/en/ros/ros2_comm.html#humble)
+FROM ros-stage as px4-stage
+
+# Update
+USER root
+RUN apt update && apt upgrade -y
+
+# System deps
+RUN pip3 install --upgrade \
+    kconfiglib pyros-genmsg empy
+
+# Set user
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+
+# Clone PX4 stack
+RUN git clone --recursive https://github.com/PX4/PX4-Autopilot.git
+RUN echo $UBUNTU_PSW | sudo -S bash PX4-Autopilot/Tools/setup/ubuntu.sh
+RUN cd PX4-Autopilot/ && make px4_sitl
+
+# Setup Micro XRCE-DDS Agent & Client
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+RUN cd Micro-XRCE-DDS-Agent \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make \
+    && echo $UBUNTU_PSW | sudo -S make install \
+    && echo $UBUNTU_PSW | sudo -S ldconfig /usr/local/lib/
+
+# Clean
+USER root
+RUN apt -y autoremove && apt clean autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+
+# Set user
+USER $UBUNTU_USER
+WORKDIR /home/$UBUNTU_USER
+
+RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
+# Set entrypoint
+COPY ./docker/ros2_entrypoint.sh /
+ENTRYPOINT ["/ros2_entrypoint.sh"]
+
+ENV force_color_prompt=yes
+CMD ["bash"]
